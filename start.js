@@ -21,6 +21,8 @@ casper.start().repeat(countTotal, function() {
     // 設定 userAgent
     this.userAgent('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.017902.801 Safari/537.36');
 
+    this.echo('開始時間: ' + new Date(), 'COMMENT');
+
     // 先爬新聞首頁
     this.thenOpen('http://nownews.com/', function() {
         var foo = this.evaluate(function() {
@@ -40,6 +42,7 @@ casper.start().repeat(countTotal, function() {
                 return document.title;
             });
             this.echo('step3, 爬到的新聞標題: ' + bar, 'INFO');
+            this.echo('結束時間: ' + new Date(), 'COMMENT');
             count++;
             this.echo('爬取進度 ' + count + '/' + countTotal, 'INFO_BAR');
         });
