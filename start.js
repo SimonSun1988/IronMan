@@ -1,4 +1,3 @@
-// var casper = require('casper').create();
 var casper = require('casper').create({
     clientScripts:  [
         'jquery-1.11.3.js'
@@ -9,62 +8,43 @@ var casper = require('casper').create({
     },
     verbose: true,
     waitTimeout: 20000,
-    // logLevel: 'debug'
-
+    // logLevel: 'debug' //如果要看 debug 模式請把註解拿掉
 });
 
-var count = casper.cli.get(0) ? parseInt(casper.cli.get(0), 10) : 10;
-casper.echo(count, 'INFO');
-casper.start().repeat(count, function() {
+var count = 0; // 計算目前爬了幾次
 
+var countTotal = casper.cli.get(0) ? parseInt(casper.cli.get(0), 10) : 10; // 總共要爬的次數
+casper.echo('重複次數: ' + countTotal, 'GREEN_BAR');
+
+casper.start().repeat(countTotal, function() {
+
+    // 設定 userAgent
     this.userAgent('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.017902.801 Safari/537.36');
+
+    // 先爬新聞首頁
     this.thenOpen('http://nownews.com/', function() {
         var foo = this.evaluate(function() {
             return $('#headline a').attr('href');
         });
 
-        var url = 'http://nownews.com' + foo;
-
+        this.echo('step1, 爬取連結: ' + this.getCurrentUrl(), 'INFO');
         this.then(function() {
             this.click('#headline');
         });
 
-        this.echo(url, 'INFO');
-
+        // 爬大三小六第一則
+        var url = 'http://nownews.com' + foo;
+        this.echo('step2, 爬取連結: ' + url, 'INFO');
         this.thenOpen(url, function() {
             var bar = this.evaluate(function() {
                 return document.title;
             });
-            this.echo(bar, 'INFO');
+            this.echo('step3, 爬到的新聞標題: ' + bar, 'INFO');
+            count++;
+            this.echo('爬取進度 ' + count + '/' + countTotal, 'INFO_BAR');
         });
     });
 });
-
-// casper.then(function(){
-//     var bar = this.evaluate(function(){
-//         return $('a').attr('href');
-//     });
-//     this.echo(bar, 'INFO');
-//     this.click('a');
-// });
-
-// casper.then(function() {
-//     console.log('clicked ok, new location is ' + this.getCurrentUrl());
-// });
-
-// casper.then(function () {
-//     this.back();
-// });
-
-// casper.then(function() {
-//     console.log('clicked ok, new location is ' + this.getCurrentUrl());
-// });
-
-
-
-// setInterval(function(){
-//     casper.run();
-// }, 120000);
 
 casper.run();
 
