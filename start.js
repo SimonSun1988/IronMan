@@ -43,6 +43,7 @@ casper.start().repeat(countTotal, function() {
 
         // 爬大三小六或是外部傳入的連結
         var url = cliUrl === undefined ? foo : cliUrl;
+        url = url === null ? 'http://www.nownews.com' : url;
         this.echo('step2, 爬取連結: ' + url, 'INFO');
         this.thenOpen(url, function() {
             var bar = this.evaluate(function() {
