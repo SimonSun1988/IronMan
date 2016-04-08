@@ -13,6 +13,8 @@ var casper = require('casper').create({
 
 var count = 0; // 計算目前爬了幾次
 
+var cliUrl = casper.cli.get('url'); // 從外部參數帶入 url
+
 var countTotal = casper.cli.get(0) ? parseInt(casper.cli.get(0), 10) : 10; // 總共要爬的次數
 casper.echo('重複次數: ' + countTotal, 'GREEN_BAR');
 
@@ -25,8 +27,11 @@ casper.start().repeat(countTotal, function() {
 
     // 先爬新聞首頁
     this.thenOpen('http://nownews.com/', function() {
+
         var foo = this.evaluate(function() {
-            return $('#headline a').attr('href');
+            var newsTotal = $('#headline a').length;
+            var number = Math.floor((Math.random() * newsTotal) + 1);
+            return $('#headline a')[number].href;
         });
 
         this.echo('step1, 爬取連結: ' + this.getCurrentUrl(), 'INFO');
@@ -34,8 +39,10 @@ casper.start().repeat(countTotal, function() {
             this.click('#headline');
         });
 
-        // 爬大三小六第一則
-        var url = 'http://nownews.com' + foo;
+        // console.log(zoo);
+
+        // 爬大三小六或是外部傳入的連結
+        var url = cliUrl === undefined ? foo : cliUrl;
         this.echo('step2, 爬取連結: ' + url, 'INFO');
         this.thenOpen(url, function() {
             var bar = this.evaluate(function() {
