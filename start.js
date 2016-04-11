@@ -28,13 +28,15 @@ casper.echo('最短等待時間: ' + waitMinSecond + ' ms', 'GREEN_BAR');
 
 casper.start().repeat(countTotal, function() {
 
-    // 設定 userAgent
-    this.userAgent('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.017902.801 Safari/537.36');
+    var self = this;
 
-    this.echo('開始時間: ' + new Date(), 'COMMENT');
+    // 設定 userAgent
+    self.userAgent('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.017902.801 Safari/537.36');
+
+    self.echo('開始時間: ' + new Date(), 'COMMENT');
 
     // 先爬新聞首頁
-    this.thenOpen('http://nownews.com/', function() {
+    self.thenOpen('http://nownews.com/', function() {
 
         var foo = this.evaluate(function() {
             var newsTotal = $('#headline a').length;
@@ -56,16 +58,15 @@ casper.start().repeat(countTotal, function() {
 
         var url = cliUrl === undefined ? foo : cliUrl;
         url = url === null ? 'http://www.nownews.com' : url;
-        this.echo('等待時間: ' + romdomWaitTime, 'INFO');
 
-        // 每一次這個需求都會等待時間
-        this.wait(romdomWaitTime, function() {
-            this.echo('step2, 爬取連結: ' + url, 'INFO');
-            this.thenOpen(url, function() {
-                var bar = this.evaluate(function() {
-                    return document.title;
-                });
-                this.echo('step3, 爬到的新聞標題: ' + bar, 'INFO');
+        this.echo('step2, 爬取連結: ' + url, 'INFO');
+        this.thenOpen(url, function() {
+            var bar = this.evaluate(function() {
+                return document.title;
+            });
+            this.echo('step3, 爬到的新聞標題: ' + bar, 'INFO');
+            this.echo('停留時間: ' + romdomWaitTime, 'INFO');
+            this.wait(romdomWaitTime, function() {
                 this.echo('結束時間: ' + new Date(), 'COMMENT');
                 count++;
                 this.echo('爬取進度 ' + count + '/' + countTotal, 'INFO_BAR');
