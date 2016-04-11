@@ -11,12 +11,20 @@ var casper = require('casper').create({
     // logLevel: 'debug' //如果要看 debug 模式請把註解拿掉
 });
 
+var getRandom = function(min, max) {
+    return parseInt((Math.random() * (max - min) + min), 10);
+}
+
 var count = 0; // 計算目前爬了幾次
 
 var cliUrl = casper.cli.get('url'); // 從外部參數帶入 url
+var waitMaxSecond = casper.cli.get('waitMaxSecond') || (1000 * 60 * 5); // 等待最大時間
+var waitMinSecond = casper.cli.get('waitMinSecond') || (1000 * 60 * 1); // 等待最小時間
 
 var countTotal = casper.cli.get(0) ? parseInt(casper.cli.get(0), 10) : 10; // 總共要爬的次數
 casper.echo('重複次數: ' + countTotal, 'GREEN_BAR');
+casper.echo('最長等待時間: ' + waitMaxSecond + ' ms', 'GREEN_BAR');
+casper.echo('最短等待時間: ' + waitMinSecond + ' ms', 'GREEN_BAR');
 
 casper.start().repeat(countTotal, function() {
 
@@ -39,20 +47,29 @@ casper.start().repeat(countTotal, function() {
             this.click('#headline');
         });
 
-        // console.log(zoo);
+        /*
+         * 爬大三小六或是外部傳入的連結
+         */
 
-        // 爬大三小六或是外部傳入的連結
+        // 處理隨機等待時間
+        var romdomWaitTime = getRandom(waitMinSecond, waitMaxSecond);
+
         var url = cliUrl === undefined ? foo : cliUrl;
         url = url === null ? 'http://www.nownews.com' : url;
-        this.echo('step2, 爬取連結: ' + url, 'INFO');
-        this.thenOpen(url, function() {
-            var bar = this.evaluate(function() {
-                return document.title;
+        this.echo('等待時間: ' + romdomWaitTime, 'INFO');
+
+        // 每一次這個需求都會等待時間
+        this.wait(romdomWaitTime, function() {
+            this.echo('step2, 爬取連結: ' + url, 'INFO');
+            this.thenOpen(url, function() {
+                var bar = this.evaluate(function() {
+                    return document.title;
+                });
+                this.echo('step3, 爬到的新聞標題: ' + bar, 'INFO');
+                this.echo('結束時間: ' + new Date(), 'COMMENT');
+                count++;
+                this.echo('爬取進度 ' + count + '/' + countTotal, 'INFO_BAR');
             });
-            this.echo('step3, 爬到的新聞標題: ' + bar, 'INFO');
-            this.echo('結束時間: ' + new Date(), 'COMMENT');
-            count++;
-            this.echo('爬取進度 ' + count + '/' + countTotal, 'INFO_BAR');
         });
     });
 });
